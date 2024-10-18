@@ -2,6 +2,7 @@ from rest_framework import generics , status
 from rest_framework.response import Response
 # from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.authtoken.views import Token
 from .serializers import *
 
 class CreateUserView(generics.CreateAPIView):
@@ -10,7 +11,7 @@ class CreateUserView(generics.CreateAPIView):
 class RetrieveUserView(generics.RetrieveAPIView):
     serializer_class = UserDetailSerializer
     queryset = get_user_model().objects.all()
-    lookup_field = 'email',
+    lookup_field = 'email'
 #   authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -56,3 +57,14 @@ class DeleteUserView(generics.DestroyAPIView):
             return Response({'message' : 'user deleted successfully!'}, status.HTTP_200_OK)
         else:
             return Response({'message': 'user access denied!'}, status.HTTP_401_UNAUTHORIZED)
+
+class LogoutView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            token = Token.objects.get(user=request.user)
+            token.delete()
+            return Response({'message': 'logged out'}, status.HTTP_200_OK)
+        except:
+            return Response({'message': 'token not found'}, status.HTTP_400_BAD_REQUEST)
