@@ -15,6 +15,15 @@ class HotelSerializers(serializers.ModelSerializer):
         model = Hotel
         fields = '__all__'
 
+    def validate(self, attr):
+        rooms_date = attr.get('rooms', None)
+        room_numbers = [room['room_number'] for room in rooms_date]
+
+        if len(room_numbers) != len(set(room_numbers)):
+            raise serializers.ValidationError({'room_number': 'Room numbers must be unique over a hotel room!'})
+
+        return attr
+
     def create(self, validated_data):
         rooms_data = validated_data.pop('rooms' , None)
         hotel = Hotel.objects.create(**validated_data)
@@ -24,17 +33,21 @@ class HotelSerializers(serializers.ModelSerializer):
         return hotel
 
     def update(self, instance, validated_data):
-        rooms_date = validated_data.pop('rooms')
-        hotel = super.update(instance, validated_data)
-        for room_date in rooms_date:
-            room_instance = Room.objects.get(id=room_date['id'])
-            room_instance.update(**room_date)
-            room_instance.save()
-
         rooms_date = validated_data.pop('rooms', None)
         hotel = super().update(instance, validated_data)
         for room_date in rooms_date:
             room_instance = Room.objects.get(id=room_date.pop('id', None))
+
+            # validate room_number
+
+            update_room_number = room_date.get('room_number')
+            if update_room_number and room_instance.room_number != update_room_number:
+                all_room_numbers = [room.room_number for room in Room.objects.filter(hotel=hotel)]
+                if all_room_numbers.__contains__(update_room_number):
+                    raise serializers.ValidationError({'room_number': 'Room numbers must be unique over a hotel room!'})
+
+            #
+            
             room_serializer = RoomSerializers(instance=room_instance, data=room_date, partial=True)
             if room_serializer.is_valid():
                 room_serializer.save()
