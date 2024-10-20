@@ -9,7 +9,7 @@ class HotelViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.Retr
 
     def get_serializer_class(self):
         if self.action == 'upload_image':
-            return HotelSerializers
+            return HotelImageSerializers
         else:
             return self.serializer_class
     @action(methods=['POST'], detail=True, url_path='upload-image')
