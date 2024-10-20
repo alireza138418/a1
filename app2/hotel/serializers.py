@@ -47,7 +47,7 @@ class HotelSerializers(serializers.ModelSerializer):
                     raise serializers.ValidationError({'room_number': 'Room numbers must be unique over a hotel room!'})
 
             #
-            
+
             room_serializer = RoomSerializers(instance=room_instance, data=room_date, partial=True)
             if room_serializer.is_valid():
                 room_serializer.save()
@@ -58,3 +58,9 @@ class HotelSerializers(serializers.ModelSerializer):
 #           room_instance.save()
 
         return hotel
+
+class HotelImageSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Hotel
+        fields = ('id', 'image')
+        read_only = ('id', )

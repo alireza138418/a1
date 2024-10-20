@@ -1,7 +1,13 @@
+import uuid
+import os
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
 
+def hotel_image_path(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = f'{uuid.uuid4()}.{ext}'
+    return os.path.join('uploads/hotel-image', filename)
 class UserManager(BaseUserManager):
 
     def create_user(self, email, password, **extra_field):
@@ -52,6 +58,7 @@ class Hotel(models.Model):
     total_rooms = models.IntegerField(null=True , blank=True)
     available_rooms = models.IntegerField(null=True , blank=True)
     create_at = models.DateTimeField(auto_now_add=True)
+    image = models.ImageField(null=True, upload_to=hotel_image_path)
 
     def __str__(self):
         return self.name

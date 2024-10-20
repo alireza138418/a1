@@ -2,3 +2,4 @@ django == 5.1.1
 djangorestframework == 3.14.0
 djangorestframework-simplejwt == 4.12.2
 psycopg2 == 2.9.9
+pillow == 11.0.0
